@@ -15,11 +15,11 @@ import { useState } from "react";
 import "./App.css";
 import MaterialUIDatePickers from "./Components/DatePicker";
 import { CloudUpload, ArrowBack, Delete } from "@material-ui/icons";
-import { ValidatorForm } from "react-material-ui-form-validator";
 import axios from "axios";
 
 function App() {
   const [formInfo, setFormInfo] = useState({});
+  console.log("forminfo", formInfo);
   const [selectedDate, setSelectedDate] = useState(null);
   const [priority, setPriority] = useState("");
   const [location, setLocation] = useState("");
@@ -91,9 +91,21 @@ function App() {
       !formInfo.subRequestType ? "This field is required" : ""
     );
     setImageErrorText(!formInfo.formImage ? "This field is required" : "");
-    let params = {
-      formInfo,
-    };
+    const formData = new FormData();
+    formData.append("date", formInfo.date);
+    formData.append("fullName", formInfo.fullName);
+    formData.append("email", formInfo.email);
+    formData.append("phoneNumber", formInfo.phoneNumber);
+    formData.append("priority", formInfo.priority);
+    formData.append("location", formInfo.location);
+    formData.append("unit", formInfo.unit);
+    formData.append("requestType", formInfo.requestType);
+    formData.append("maintenanceDetails", formInfo.maintenanceDetails);
+    formData.append("subRequestType", formInfo.subRequestType);
+    formData.append("formImage", formInfo.formImage);
+    // let params = {
+    //   formInfo,
+    // };
     const formKeys = [
       "fullName",
       "email",
@@ -105,12 +117,14 @@ function App() {
       "maintenanceDetails",
       "subRequestType",
     ];
+
     const isFormValid = formKeys.every((e) =>
       Object.keys(formInfo).includes(e)
     );
+    console.log("formData", formData);
     try {
       if (isFormValid) {
-        await axios.post("http://localhost:3002/api/submitData", params);
+        await axios.post("http://localhost:3002/api/submitData", formData);
       }
     } catch (err) {
       console.log(err);
@@ -190,342 +204,335 @@ function App() {
             </Typography>
 
             <Paper elevation={0} style={{ padding: "30px" }}>
-              <ValidatorForm>
-                <Grid container spacing={2}>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <MaterialUIDatePickers
-                      value={selectedDate}
-                      handleDateChange={handleDateChange}
-                      dateErrorText={dateErrorText}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <TextField
-                      fullWidth
-                      label="Full Name"
-                      size="small"
-                      variant="outlined"
+              <Grid container spacing={2}>
+                <Grid item md={12} xs={12} lg={12}>
+                  <MaterialUIDatePickers
+                    value={selectedDate}
+                    handleDateChange={handleDateChange}
+                    dateErrorText={dateErrorText}
+                  />
+                </Grid>
+                <Grid item md={12} xs={12} lg={12}>
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    size="small"
+                    variant="outlined"
+                    required
+                    error={nameErrorText}
+                    helperText={nameErrorText}
+                    value={formInfo.fullName || ""}
+                    onChange={(event) => {
+                      setFormInfo({
+                        ...formInfo,
+                        fullName: event.target.value,
+                      });
+                      setNameErrorText("");
+                    }}
+                  />
+                </Grid>
+                <Grid item md={12} xs={12} lg={12}>
+                  <TextField
+                    fullWidth
+                    type="email"
+                    label="Email"
+                    size="small"
+                    variant="outlined"
+                    required
+                    error={emailErrorText}
+                    helperText={emailErrorText}
+                    value={formInfo.email || ""}
+                    onChange={(e) => emailValidation(e)}
+                  />
+                </Grid>
+                <Grid item md={12} xs={12} lg={12}>
+                  <TextField
+                    required
+                    error={numberErrorText}
+                    helperText={numberErrorText}
+                    fullWidth
+                    label="Phone Number"
+                    size="small"
+                    variant="outlined"
+                    placeholder="xxx-xxx-xxxx"
+                    value={formInfo.phoneNumber || ""}
+                    onChange={(e) => HandlePhoneNumber(e)}
+                  />
+                </Grid>
+
+                <Grid item md={12} xs={12} lg={12}>
+                  <FormControl
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    required
+                    error={priorityErrorText}
+                  >
+                    <InputLabel>Priority</InputLabel>
+                    <Select
                       required
-                      error={!!nameErrorText}
-                      helperText={nameErrorText}
-                      value={formInfo.fullName || ""}
+                      label="Priority"
+                      fullWidth
+                      MenuProps={{
+                        PaperProps: {
+                          style: { marginTop: 45 },
+                        },
+                      }}
+                      value={priority}
                       onChange={(event) => {
+                        setPriority(event.target.value);
                         setFormInfo({
                           ...formInfo,
-                          fullName: event.target.value,
+                          priority: event.target.value,
                         });
-                        setNameErrorText("");
+                        setPriorityErrorText("");
                       }}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <TextField
-                      fullWidth
-                      type="email"
-                      label="Email"
-                      size="small"
-                      variant="outlined"
-                      required
-                      error={!!emailErrorText}
-                      helperText={emailErrorText}
-                      value={formInfo.email || ""}
-                      onChange={(e) => emailValidation(e)}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <TextField
-                      required
-                      error={!!numberErrorText}
-                      helperText={numberErrorText}
-                      fullWidth
-                      label="Phone Number"
-                      size="small"
-                      variant="outlined"
-                      placeholder="xxx-xxx-xxxx"
-                      value={formInfo.phoneNumber || ""}
-                      onChange={(e) => HandlePhoneNumber(e)}
-                    />
-                  </Grid>
-
-                  <Grid item md={12} xs={12} lg={12}>
-                    <FormControl
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                      required
                     >
-                      <InputLabel>Priority</InputLabel>
-                      <Select
-                        required
-                        label="Priority"
-                        fullWidth
-                        MenuProps={{
-                          PaperProps: {
-                            style: { marginTop: 45 },
-                          },
-                        }}
-                        error={!!priorityErrorText}
-                        value={priority}
-                        onChange={(event) => {
-                          setPriority(event.target.value);
-                          setFormInfo({
-                            ...formInfo,
-                            priority: event.target.value,
-                          });
-                          setPriorityErrorText("");
-                        }}
-                      >
-                        <MenuItem value="Urgent - Live Chat Conversation">
-                          Urgent - Live Chat Conversation
-                        </MenuItem>
-                      </Select>
-                      <FormHelperText error={!!priorityErrorText}>
-                        {priorityErrorText}
-                      </FormHelperText>
-                    </FormControl>
-                  </Grid>
+                      <MenuItem value="Urgent - Live Chat Conversation">
+                        Urgent - Live Chat Conversation
+                      </MenuItem>
+                    </Select>
+                    <FormHelperText>{priorityErrorText}</FormHelperText>
+                  </FormControl>
+                </Grid>
 
-                  <Grid item md={12} xs={12} lg={12}>
-                    <FormControl
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                      required
-                    >
-                      <InputLabel>Location</InputLabel>
-                      <Select
-                        MenuProps={{
-                          PaperProps: {
-                            style: { marginTop: 45 },
-                          },
-                        }}
-                        required
-                        error={!!locationErrorText}
-                        helperText={locationErrorText}
-                        label="Location"
-                        fullWidth
-                        value={location}
-                        onChange={(event) => {
-                          setLocation(event.target.value);
-                          setFormInfo({
-                            ...formInfo,
-                            location: event.target.value,
-                          });
-                          setLocationErrorText("");
-                        }}
-                      >
-                        <MenuItem value="In - Unit">In - Unit</MenuItem>
-                      </Select>
-                      <FormHelperText error={!!locationErrorText}>
-                        {locationErrorText}
-                      </FormHelperText>
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <TextField
-                      type="number"
-                      InputProps={{
-                        inputProps: {
-                          max: 3,
-                          min: 1,
+                <Grid item md={12} xs={12} lg={12}>
+                  <FormControl
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    required
+                    error={locationErrorText}
+                  >
+                    <InputLabel>Location</InputLabel>
+                    <Select
+                      MenuProps={{
+                        PaperProps: {
+                          style: { marginTop: 45 },
                         },
                       }}
                       required
-                      error={!!unitErrorText}
-                      helperText={unitErrorText}
+                      label="Location"
                       fullWidth
-                      label="Unit"
-                      size="small"
-                      variant="outlined"
-                      value={formInfo.unit || ""}
+                      value={location}
                       onChange={(event) => {
+                        setLocation(event.target.value);
                         setFormInfo({
                           ...formInfo,
-                          unit: event.target.value,
+                          location: event.target.value,
                         });
-                        setUnitErrorText("");
-                      }}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <FormControl
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                      required
-                    >
-                      <InputLabel>Request Type</InputLabel>
-                      <Select
-                        required
-                        MenuProps={{
-                          PaperProps: {
-                            style: { marginTop: 45 },
-                          },
-                        }}
-                        error={!!requestErrorText}
-                        helperText={requestErrorText}
-                        label="Request Type"
-                        fullWidth
-                        value={requestType}
-                        onChange={(event) => {
-                          setRequestType(event.target.value);
-                          setFormInfo({
-                            ...formInfo,
-                            requestType: event.target.value,
-                          });
-                          setRequestErrorText("");
-                        }}
-                      >
-                        <MenuItem value="Electicity">Electicity</MenuItem>
-                      </Select>
-                      <FormHelperText error={!!requestErrorText}>
-                        {requestErrorText}
-                      </FormHelperText>
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <FormControl
-                      variant="outlined"
-                      fullWidth
-                      size="small"
-                      required
-                    >
-                      <InputLabel id="demo-simple-select-label">
-                        Sub - Request Type
-                      </InputLabel>
-                      <Select
-                        MenuProps={{
-                          PaperProps: {
-                            style: { marginTop: 45 },
-                          },
-                        }}
-                        error={!!subRequestErrorText}
-                        helperText={subRequestErrorText}
-                        required
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        label="Sub - Request Type"
-                        fullWidth
-                        value={subRequestType}
-                        onChange={(event) => {
-                          setSubRequestType(event.target.value);
-                          setFormInfo({
-                            ...formInfo,
-                            subRequestType: event.target.value,
-                          });
-                          setSubRequestErrorText("");
-                        }}
-                      >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
-                      <FormHelperText error={!!subRequestErrorText}>
-                        {subRequestErrorText}
-                      </FormHelperText>
-                    </FormControl>
-                  </Grid>
-                  <Grid item md={12} xs={12} lg={12}>
-                    <TextField
-                      required
-                      error={!!maintenanceRequestErrorText}
-                      helperText={maintenanceRequestErrorText}
-                      multiline
-                      fullWidth
-                      label="Maintenance Request Details"
-                      size="small"
-                      variant="outlined"
-                      minRows={4}
-                      value={formInfo.maintenanceDetails || ""}
-                      onChange={(event) => {
-                        setFormInfo({
-                          ...formInfo,
-                          maintenanceDetails: event.target.value,
-                        });
-                        setMaintenanceRequestErrorText("");
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item md={12} xs={12} lg={12}>
-                    <Box
-                      fullWidth
-                      style={{
-                        border: "dotted",
-                        height: "100px",
-                        display: "flex",
-                        alignItems: "center",
-                        flexDirection: "column",
-                        borderColor: "#d3caca",
+                        setLocationErrorText("");
                       }}
                     >
-                      <CloudUpload
-                        style={{ fontSize: "50px", paddingTop: "10px" }}
-                        color="primary"
-                        onClick={handleProfileChange}
-                      />
-                      <input
-                        required
-                        type="file"
-                        id="fileInput"
-                        // accept=".png/*,.xlsx/*,.pdf/*"
-                        multiple
-                        onChange={(event) => {
-                          setFormInfo({
-                            ...formInfo,
-                            formImage: event.target.files[0],
-                          });
-                          setImageErrorText("");
-                        }}
-                        style={{ display: "none" }}
-                      />
-                      <Typography color="primary">Tap to upload</Typography>
-                    </Box>
-                  </Grid>
-                  {formInfo.formImage ? (
-                    <Grid item md={12} xs={12} lg={12}>
-                      <span
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                        }}
-                      >
-                        <Typography>{formInfo.formImage.name}</Typography>
-                        <Delete
-                          color="primary"
-                          onClick={(e) => deleteSelectedFile(e)}
-                          style={{
-                            height: 28,
-                            width: 28,
-                            float: "right",
-                          }}
-                        />
-                      </span>
-                    </Grid>
-                  ) : (
-                    <Grid item md={12} xs={12} lg={12}>
-                      <Typography style={{ color: "red" }}>
-                        {imageErrorText}
-                      </Typography>
-                    </Grid>
-                  )}
-                  <Grid
-                    item
-                    md={12}
-                    xs={12}
-                    lg={12}
-                    style={{ display: "flex", justifyContent: "center" }}
-                  >
-                    <Button
-                      onClick={(e) => saveFormData(e)}
-                      variant="contained"
-                      color="primary"
-                    >
-                      SEND REQUEST
-                    </Button>
-                  </Grid>
+                      <MenuItem value="In - Unit">In - Unit</MenuItem>
+                    </Select>
+                    <FormHelperText error={locationErrorText}>
+                      {locationErrorText}
+                    </FormHelperText>
+                  </FormControl>
                 </Grid>
-              </ValidatorForm>
+                <Grid item md={12} xs={12} lg={12}>
+                  <TextField
+                    type="number"
+                    InputProps={{
+                      inputProps: {
+                        max: 3,
+                        min: 1,
+                      },
+                    }}
+                    required
+                    error={unitErrorText}
+                    helperText={unitErrorText}
+                    fullWidth
+                    label="Unit"
+                    size="small"
+                    variant="outlined"
+                    value={formInfo.unit || ""}
+                    onChange={(event) => {
+                      setFormInfo({
+                        ...formInfo,
+                        unit: event.target.value,
+                      });
+                      setUnitErrorText("");
+                    }}
+                  />
+                </Grid>
+                <Grid item md={12} xs={12} lg={12}>
+                  <FormControl
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    required
+                    error={requestErrorText}
+                  >
+                    <InputLabel>Request Type</InputLabel>
+                    <Select
+                      required
+                      MenuProps={{
+                        PaperProps: {
+                          style: { marginTop: 45 },
+                        },
+                      }}
+                      label="Request Type"
+                      fullWidth
+                      value={requestType}
+                      onChange={(event) => {
+                        setRequestType(event.target.value);
+                        setFormInfo({
+                          ...formInfo,
+                          requestType: event.target.value,
+                        });
+                        setRequestErrorText("");
+                      }}
+                    >
+                      <MenuItem value="Electicity">Electicity</MenuItem>
+                    </Select>
+                    <FormHelperText error={requestErrorText}>
+                      {requestErrorText}
+                    </FormHelperText>
+                  </FormControl>
+                </Grid>
+                <Grid item md={12} xs={12} lg={12}>
+                  <FormControl
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    required
+                    error={subRequestErrorText}
+                  >
+                    <InputLabel id="demo-simple-select-label">
+                      Sub - Request Type
+                    </InputLabel>
+                    <Select
+                      MenuProps={{
+                        PaperProps: {
+                          style: { marginTop: 45 },
+                        },
+                      }}
+                      required
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      label="Sub - Request Type"
+                      fullWidth
+                      value={subRequestType}
+                      onChange={(event) => {
+                        setSubRequestType(event.target.value);
+                        setFormInfo({
+                          ...formInfo,
+                          subRequestType: event.target.value,
+                        });
+                        setSubRequestErrorText("");
+                      }}
+                    >
+                      <MenuItem value={10}>Ten</MenuItem>
+                      <MenuItem value={20}>Twenty</MenuItem>
+                      <MenuItem value={30}>Thirty</MenuItem>
+                    </Select>
+                    <FormHelperText error={subRequestErrorText}>
+                      {subRequestErrorText}
+                    </FormHelperText>
+                  </FormControl>
+                </Grid>
+                <Grid item md={12} xs={12} lg={12}>
+                  <TextField
+                    required
+                    error={maintenanceRequestErrorText}
+                    helperText={maintenanceRequestErrorText}
+                    multiline
+                    fullWidth
+                    label="Maintenance Request Details"
+                    size="small"
+                    variant="outlined"
+                    minRows={4}
+                    value={formInfo.maintenanceDetails || ""}
+                    onChange={(event) => {
+                      setFormInfo({
+                        ...formInfo,
+                        maintenanceDetails: event.target.value,
+                      });
+                      setMaintenanceRequestErrorText("");
+                    }}
+                  />
+                </Grid>
+
+                <Grid item md={12} xs={12} lg={12}>
+                  <Box
+                    fullWidth
+                    style={{
+                      border: "dotted",
+                      height: "100px",
+                      display: "flex",
+                      alignItems: "center",
+                      flexDirection: "column",
+                      borderColor: imageErrorText ? "red" : "#d3caca",
+                    }}
+                  >
+                    <CloudUpload
+                      style={{ fontSize: "50px", paddingTop: "10px" }}
+                      color="primary"
+                      onClick={handleProfileChange}
+                    />
+                    <input
+                      required
+                      type="file"
+                      id="fileInput"
+                      // accept=".png/*,.xlsx/*,.pdf/*"
+                      multiple
+                      onChange={(event) => {
+                        setFormInfo({
+                          ...formInfo,
+                          formImage: event.target.files[0],
+                        });
+                        setImageErrorText("");
+                      }}
+                      style={{ display: "none" }}
+                    />
+                    <Typography color="primary">Tap to upload</Typography>
+                  </Box>
+                </Grid>
+                {formInfo.formImage ? (
+                  <Grid item md={12} xs={12} lg={12}>
+                    <span
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                      }}
+                    >
+                      <Typography>{formInfo.formImage.name}</Typography>
+                      <Delete
+                        color="primary"
+                        onClick={(e) => deleteSelectedFile(e)}
+                        style={{
+                          height: 28,
+                          width: 28,
+                          float: "right",
+                        }}
+                      />
+                    </span>
+                  </Grid>
+                ) : (
+                  <Grid item md={12} xs={12} lg={12}>
+                    <Typography style={{ color: "red" }}>
+                      {imageErrorText}
+                    </Typography>
+                  </Grid>
+                )}
+                <Grid
+                  item
+                  md={12}
+                  xs={12}
+                  lg={12}
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Button
+                    onClick={(e) => saveFormData(e)}
+                    variant="contained"
+                    color="primary"
+                  >
+                    SEND REQUEST
+                  </Button>
+                </Grid>
+              </Grid>
             </Paper>
           </Grid>
         </Grid>

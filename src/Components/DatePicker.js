@@ -1,35 +1,28 @@
-import * as React from "react";
-import Stack from "@mui/material/Stack";
-import { TextField } from "@material-ui/core";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import "date-fns";
+import React from "react";
+import DateFnsUtils from "@date-io/date-fns";
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDatePicker,
+} from "@material-ui/pickers";
 
 export default function MaterialUIDatePickers(props) {
   const { value, handleDateChange, dateErrorText } = props;
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={3}>
-        <DesktopDatePicker
-          required
-          label="Date Of Request"
-          inputFormat="MM/DD/YYYY"
-          value={value}
-          onChange={handleDateChange}
-          renderInput={(params) => (
-            <TextField
-              variant="outlined"
-              fullWidth
-              required
-              size="small"
-              error={!!dateErrorText}
-              helperText={dateErrorText}
-              {...params}
-            />
-          )}
-        />
-      </Stack>
-    </LocalizationProvider>
+    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <KeyboardDatePicker
+        required
+        fullWidth
+        label="Date Of Request"
+        inputVariant="outlined"
+        format="MM/dd/yyyy"
+        error={dateErrorText}
+        helperText={dateErrorText}
+        value={value}
+        size="small"
+        onChange={handleDateChange}
+      />
+    </MuiPickersUtilsProvider>
   );
 }
